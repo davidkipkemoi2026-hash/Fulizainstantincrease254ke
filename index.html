@@ -1240,16 +1240,14 @@ document.getElementById('cancelBtn').onclick=()=>hideOverlay('reviewOverlay');
 document.getElementById('payBtn').onclick = async () => {
   let phone = document.getElementById('phoneInput').value.trim();
 
-if (phone.startsWith('0')) {
-  phone = '254' + phone.slice(1);
-}
+
 
   if(!phone){
     showToast('Enter phone number');
     return;
   }
 
-  if (!selected || !selected.fee) {
+  if (!selected || !selected.amount) {
   showToast('Please select a valid package');
   return;
 }
@@ -1257,14 +1255,16 @@ if (phone.startsWith('0')) {
 hideOverlay('reviewOverlay');
 showOverlay('loadingOverlay');
   try {
-    const res = await fetch('https://new-mpesabackend.onrender.com/pay', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        phone: phone,
-        amount: Number(selected.fee)
-      })
-    });
+    let formattedPhone = phone.replace(/^0/, '254');
+
+const res = await fetch('https://new-mpesabackend.onrender.com/stk', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    phone: formattedPhone,
+    amount: selected.amount
+  })
+});
 
     const data = await res.json();
 
