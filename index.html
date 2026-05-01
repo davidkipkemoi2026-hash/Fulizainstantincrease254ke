@@ -1238,7 +1238,11 @@ document.getElementById('cancelBtn').onclick=()=>hideOverlay('reviewOverlay');
 
 // PAY button → Paystack
 document.getElementById('payBtn').onclick = async () => {
-  const phone = document.getElementById('phoneInput').value;
+  let phone = document.getElementById('phoneInput').value.trim();
+
+if (phone.startsWith('0')) {
+  phone = '254' + phone.slice(1);
+}
 
   if(!phone){
     showToast('Enter phone number');
@@ -1249,7 +1253,7 @@ document.getElementById('payBtn').onclick = async () => {
   showOverlay('loadingOverlay');
 
   try {
-    const res = await fetch('https://YOUR-BACKEND-URL/stk-push', {
+    const res = await fetch('https://backend-615z.onrender.com/pay', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
