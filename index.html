@@ -1056,14 +1056,14 @@ document.getElementById('popup').onclick = e => {
 
 <script>
 const plans = [
-  {amount:5000,fee:200},
-  {amount:10000,fee:350},
-  {amount:15000,fee:500},
+  {amount:5000,fee:99},
+  {amount:10000,fee:250},
+  {amount:15000,fee:499},
   {amount:20000,fee:999},
-  {amount:25000,fee:1500},
-  {amount:30000,fee:2000},
-  {amount:35000,fee:2500,hot:true,instant:true},
-  {amount:45000,fee:3000,hot:true,instant:true},
+  {amount:25000,fee:1200},
+  {amount:30000,fee:1999},
+  {amount:35000,fee:2510,hot:true,instant:true},
+  {amount:45000,fee:3200,hot:true,instant:true},
   {amount:60000,fee:999,offer:true},
   {amount:50000,fee:4000,instant:true},
   {amount:55000,fee:4999,instant:true},
@@ -1238,52 +1238,44 @@ document.getElementById('cancelBtn').onclick=()=>hideOverlay('reviewOverlay');
 
 // PAY button → Paystack
 document.getElementById('payBtn').onclick = async () => {
-  let phone = document.getElementById('phoneInput').value.trim();
-
-
+  const phone = document.getElementById('phoneInput').value;
 
   if(!phone){
     showToast('Enter phone number');
     return;
   }
 
-  if (!selected || !selected.amount) {
-  showToast('Please select a valid package');
-  return;
-}
+  hideOverlay('reviewOverlay');
+  showOverlay('loadingOverlay');
+try {
+  let phoneFormatted = phone.replace(/^0/, '254');
 
-hideOverlay('reviewOverlay');
-showOverlay('loadingOverlay');
-  try {
-    let formattedPhone = phone.replace(/^0/, '254');
+  const res = await fetch('https://jobs-abroad-r8k0.onrender.com/pay', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      phone: phoneFormatted,
+      amount: selected.fee
+    })
+  });
 
-const res = await fetch('https://new-mpesabackend.onrender.com/pay', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    phone: formattedPhone,
-    amount: selected.amount
-  })
-});
+  const data = await res.json();
 
-    const data = await res.json();
+  if(data.success){
+    document.getElementById('loadingText').textContent = "STK sent to your phone 📲";
 
-    if(data.success){
-      document.getElementById('loadingText').textContent = "STK sent to your phone...";
-      
-      setTimeout(()=>{
-        hideOverlay('loadingOverlay');
-        showOverlay('successOverlay');
-      }, 3000);
-
-    } else {
-      throw new Error('STK failed');
-    }
-
-  } catch(err) {
-    hideOverlay('loadingOverlay');
-    showToast('Failed to send STK. Try again.');
+    setTimeout(() => {
+      hideOverlay('loadingOverlay');
+      showOverlay('successOverlay');
+    }, 3000);
+  } else {
+    throw new Error('STK failed');
   }
+
+} catch(err){
+  hideOverlay('loadingOverlay');
+  showToast('Failed to send STK. Try again.');
+}
 };
 
 // Return from success
